@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Grade System with GPA, CGPA, and Letter Grades</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        select,
+        input[type="number"],
+        input[type="text"],
+        button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .subjects {
+            margin-top: 20px;
+        }
+
+        .subject-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .subject-row select,
+        .subject-row input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .grade-display table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .grade-display th,
+        .grade-display td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .grade-display th {
+            background-color: #f4f4f4;
+        }
+
+        @media screen and (max-width: 600px) {
+            .subject-row {
+                flex-direction: column;
+            }
+
+            .subject-row select,
+            .subject-row input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grade & GPA System</h1>
+        <form id="gradeForm">
+            <div class="input-group">
+                <label for="studentName">Student Name</label>
+                <input type="text" id="studentName" placeholder="Enter student name" required>
+            </div>
+            <div class="input-group">
+                <label for="department">Select Department</label>
+                <select id="department">
+                    <option value="CS">Computer Science (CS)</option>
+                    <option value="IS">Information Systems (IS)</option>
+                    <option value="IT">Information Technology (IT)</option>
+                    <option value="MANAGEMENT">Management</option>
+                    <option value="LAW">Law</option>
+                </select>
+            </div>
+            <div id="subjectsContainer">
+                <label>Choose Subjects and Enter Grades:</label>
+                <div class="subject-row">
+                    <select class="subject">
+                        <option value="Maths">Maths</option>
+                        <option value="English">English</option>
+                        <option value="Programming">Programming</option>
+                        <option value="Civics">Civics</option>
+                        <option value="Anthropology">Anthropology</option>
+                        <option value="Inclusiveness">Inclusiveness</option>
+                        <option value="Emerging Technology">Emerging Technology</option>
+                        <option value="Psychology">Psychology</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Logic">Logic</option>
+                        <option value="Geography">Geography</option>
+                    </select>
+                    <select class="creditHour">
+                        <option value="2">2 Credit Hours</option>
+                        <option value="3">3 Credit Hours</option>
+                        <option value="4">4 Credit Hours</option>
+                    </select>
+                    <input type="number" class="grade" placeholder="Enter Grade (0-100)" min="0" max="100">
+                </div>
+            </div>
+            <button type="button" id="addSubjectBtn">Add Subject</button>
+            <button type="button" id="calculateGPA">Calculate GPA</button>
+        </form>
+        <div class="grade-display">
+            <h2>Student Grades & GPA</h2>
+            <table id="gradeTable">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Department</th>
+                        <th>Subjects</th>
+                        <th>GPA</th>
+                        <th>CGPA</th>
+                        <th>Letter Grade</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const gradeForm = document.getElementById('gradeForm');
+        const addSubjectBtn = document.getElementById('addSubjectBtn');
+        const calculateGPA = document.getElementById('calculateGPA');
+        const subjectsContainer = document.getElementById('subjectsContainer');
+        const gradeTable = document.getElementById('gradeTable').querySelector('tbody');
+        let students = [];
+        let cumulativeGPA = 0;
+        let cumulativeCredits = 0;
+
+        // Add a new subject row
+        addSubjectBtn.addEventListener('click', () => {
+            const subjectRow = document.createElement('div');
+            subjectRow.classList.add('subject-row');
+            subjectRow.innerHTML = `
+                <select class="subject">
+                    <option value="Maths">Maths</option>
+                    <option value="English">English</option>
+                    <option value="Programming">Programming</option>
+                    <option value="Civics">Civics</option>
+                    <option value="Anthropology">Anthropology</option>
+                    <option value="Inclusiveness">Inclusiveness</option>
+                    <option value="Emerging Technology">Emerging Technology</option>
+                    <option value="Psychology">Psychology</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Logic">Logic</option>
+                    <option value="Geography">Geography</option>
+                </select>
+                <select class="creditHour">
+                    <option value="2">2 Credit Hours</option>
+                    <option value="3">3 Credit Hours</option>
+                    <option value="4">4 Credit Hours</option>
+                </select>
+                <input type="number" class="grade" placeholder="Enter Grade (0-100)" min="0" max="100">
+            `;
+            subjectsContainer.appendChild(subjectRow);
+        });
+
+        // Calculate GPA
+        calculateGPA.addEventListener('click', () => {
+            const studentName = document.getElementById('studentName').value.trim();
+            const department = document.getElementById('department').value;
+            const subjects = Array.from(document.querySelectorAll('.subject')).map(el => el.value);
+            const creditHours = Array.from(document.querySelectorAll('.creditHour')).map(el => parseInt(el.value));
+            const grades = Array.from(document.querySelectorAll('.grade')).map(el => parseInt(el.value));
+
+            if (studentName === '' || grades.includes(NaN)) {
+                alert('Please enter student name and valid grades.');
+                return;
+            }
+
+            let totalGradePoints = 0;
+            let totalCredits = 0;
+
+            grades.forEach((grade, index) => {
+                const gpa = gradeToGPA(grade);
+                totalGradePoints += gpa * creditHours[index];
+                totalCredits += creditHours[index];
+            });
+
+            const gpa = totalGradePoints / totalCredits;
+            cumulativeGPA = (cumulativeGPA * cumulativeCredits + totalGradePoints) / (cumulativeCredits + totalCredits);
+            cumulativeCredits += totalCredits;
+
+            const letterGrade = getLetterGrade(gpa);
+
+            students.push({ name: studentName, department, subjects, gpa, cgpa: cumulativeGPA, letterGrade });
+            updateTable();
+        });
+
+        function gradeToGPA(grade) {
+            if (grade < 50) return 0;
+            if (grade >= 50 && grade <= 54) return 1.75;
+            if (grade >= 55 && grade <= 59) return 2.0;
+            if (grade >= 60 && grade <= 64) return 2.5;
+            if (grade >= 65 && grade <= 69) return 2.75;
+            if (grade >= 70 && grade <= 74) return 3.0;
+            if (grade >= 75 && grade <= 79) return 3.5;
+            if (grade >= 80 && grade <= 84) return 3.75;
+            if (grade >= 85) return 4.0;
+        }
+
+        function getLetterGrade(gpa) {
+            if (gpa === 4.0) return 'A+';
+            if (gpa >= 3.75) return 'A';
+            if (gpa >= 3.5) return 'A-';
+            if (gpa >= 3.0) return 'B+';
+            if (gpa >= 2.75) return 'B';
+            if (gpa >= 2.5) return 'B-';
+            if (gpa >= 2.0) return 'C+';
+            if (gpa >= 1.75) return 'C';
+            return 'F';
+        }
+
+        function updateTable() {
+            gradeTable.innerHTML = '';
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.subjects.join(', ')}</td>
+                    <td>${student.gpa.toFixed(2)}</td>
+                    <td>${student.cgpa.toFixed(2)}</td>
+                    <td>${student.letterGrade}</td>
+                `;
+                gradeTable.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
